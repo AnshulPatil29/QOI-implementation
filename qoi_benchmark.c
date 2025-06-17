@@ -138,7 +138,7 @@ int main(int argc, char *argv[]) {
 
         double Bpp_qoi = (double)(output_qoi_size * 8) / (width * height);
         printf("QOI Bits per pixel (Bpp): %.2f\n", Bpp_qoi);
-        printf("Raw RGBA Bits per pixel (Bpp): %.2f (32.00 for reference)\n", (double)(raw_rgba_size * 8) / (width*height) );
+        printf("Raw RGBA Bits per pixel (Bpp): %.2f\n", (double)(raw_rgba_size * 8) / (width*height) );
     } else {
         printf("Could not get QOI file size for ratio calculations.\n");
         if (input_png_size <=0) printf("Could not get input PNG file size either.\n");
