@@ -52,11 +52,11 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    uint8_t qoi_header_channels = (channels_in_file == 3) ? 3 : 4;
+    uint8_t qoi_header_channels_for_file = (channels_in_file == 3) ? 3 : 4;
     uint8_t qoi_colorspace = 0;
 
     clock_t start_time = clock();
-    int encode_status = qoi_encode_to_file(image_pixels, width, height, qoi_header_channels, qoi_colorspace, qoi_outfile);
+    int encode_status = qoi_encode_to_file(image_pixels, width, height, qoi_header_channels_for_file, qoi_colorspace, qoi_outfile);
     clock_t end_time = clock();
     double encode_time_seconds = ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
 
@@ -119,15 +119,29 @@ int main(int argc, char *argv[]) {
     long input_png_size = get_file_size(input_png_filename);
     long output_qoi_size = get_file_size(output_qoi_filename);
 
-    if (input_png_size > 0 && output_qoi_size > 0) {
-        double compression_ratio = (double)input_png_size / output_qoi_size;
-        printf("Input PNG size: %ld bytes\n", input_png_size);
+    long raw_rgba_size = (long)width * height * 4;
+
+    printf("Raw RGBA (uncompressed) size: %ld bytes\n", raw_rgba_size);
+
+    if (output_qoi_size > 0) {
+        double compression_ratio_vs_raw = (double)raw_rgba_size / output_qoi_size;
         printf("Output QOI size: %ld bytes\n", output_qoi_size);
-        printf("Compression ratio (PNG_size / QOI_size): %.2f : 1\n", compression_ratio);
+        printf("Compression ratio (Raw_RGBA_size / QOI_size): %.2f : 1\n", compression_ratio_vs_raw);
+
+        if (input_png_size > 0) {
+            double compression_ratio_vs_png = (double)input_png_size / output_qoi_size;
+            printf("Input PNG size: %ld bytes\n", input_png_size);
+            printf("Compression ratio (PNG_size / QOI_size): %.2f : 1\n", compression_ratio_vs_png);
+        } else {
+            printf("Could not get input PNG file size for PNG ratio calculation.\n");
+        }
+
         double Bpp_qoi = (double)(output_qoi_size * 8) / (width * height);
         printf("QOI Bits per pixel (Bpp): %.2f\n", Bpp_qoi);
+        printf("Raw RGBA Bits per pixel (Bpp): %.2f (32.00 for reference)\n", (double)(raw_rgba_size * 8) / (width*height) );
     } else {
-        printf("Could not get file sizes for ratio calculation.\n");
+        printf("Could not get QOI file size for ratio calculations.\n");
+        if (input_png_size <=0) printf("Could not get input PNG file size either.\n");
     }
 
     uint64_t total_pixels = (uint64_t)width * height;
